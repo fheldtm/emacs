@@ -16,9 +16,7 @@
   :demand
   :bind
   (("C-s" . swiper)
-   ("M-x" . counsel-M-x)
-   ("C-x b" . counsel-ibuffer)
-   ("C-x C-f" . counsel-find-file))
+   ("M-x" . counsel-M-x))
   :config
   (ivy-mode 1))
 
@@ -65,6 +63,12 @@
 (use-package magit
   :after transient
   :ensure t)
+
+;; projectile
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode 1))
 
 ;; <C-x>, <C-c>, <C-v> to Copy, Cut, Paste
 (cua-mode 1)

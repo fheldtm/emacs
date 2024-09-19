@@ -10,4 +10,8 @@
     "s l" 'windmove-right
     "s v" 'split-window-horizontally
     "s s" 'split-window-vertically
-    "; v" 'treemacs-select-window))
+    "; v" 'treemacs-select-window
+    "; g" 'counsel-rg
+    "; r" 'counsel-recentf
+    "; b" 'counsel-ibuffer
+    "; f" 'projectile-find-file))

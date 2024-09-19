@@ -1,7 +1,9 @@
-.cache
-.emacs.desktop
-.emacs.desktop.lock
 transient/
 elpaca/
 auto-save-list/
+.cache
 recentf
+.emacs.desktop
+.emacs.desktop.lock
+projectile-bookmarks.eld
+projectile.cache
