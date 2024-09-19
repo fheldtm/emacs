@@ -7,3 +7,5 @@ recentf
 .emacs.desktop.lock
 projectile-bookmarks.eld
 projectile.cache
+.org-id-locations
+org-persist/

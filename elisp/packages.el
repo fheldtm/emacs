@@ -74,3 +74,4 @@
 (cua-mode 1)
 
 (load-file "~/.emacs.d/elisp/treemacs.el")
+(load-file "~/.emacs.d/elisp/lsp.el")
