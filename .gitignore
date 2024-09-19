@@ -1,0 +1,6 @@
+.cache
+.emacs.desktop
+.emacs.desktop.lock
+transient/
+elpaca/
+recentf
