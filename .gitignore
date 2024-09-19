@@ -3,4 +3,5 @@
 .emacs.desktop.lock
 transient/
 elpaca/
+auto-save-list/
 recentf
