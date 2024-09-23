@@ -33,6 +33,9 @@
 
 ;; 기본 폰트 설정
 (set-face-attribute 'default nil :font "Fira Code" :height 100)
+(if (eq system-type 'darwin)
+  (set-face-attribute 'default nil :font "Fira Code" :height 140)
+)
 
 ;; 특정 모드에서는 라인 번호를 비활성화
 (dolist (mode '(org-mode-hook
