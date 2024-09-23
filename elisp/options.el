@@ -60,3 +60,6 @@
   :ensure t
   :demand t
   :config (load-theme 'dracula t))
+
+;; ElDoc Mode disable
+(global-eldoc-mode -1)

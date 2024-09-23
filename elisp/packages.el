@@ -55,13 +55,15 @@
       (define-key map (kbd "C-9") 'winum-select-window-9)
       map))
   :config
-  (winum-mode))
+  (winum-mode 1))
 
 ;; magit
 (use-package transient
   :ensure t)
 (use-package magit
   :after transient
+  :init
+  (setq magit-auto-revert-mode nil)
   :ensure t)
 
 ;; projectile
@@ -69,9 +71,6 @@
   :ensure t
   :config
   (projectile-mode 1))
-
-;; <C-x>, <C-c>, <C-v> to Copy, Cut, Paste
-(cua-mode 1)
 
 (load-file "~/.emacs.d/elisp/treemacs.el")
 (load-file "~/.emacs.d/elisp/lsp.el")
