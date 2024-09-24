@@ -1,5 +1,16 @@
-(use-package lv
-  :ensure t)
+;; TypeScript & JavaScript LSP 설정
+;; (use-package typescript-mode
+;;   :ensure t
+;;   :mode "\\.ts\\'"
+;;   :hook (typescript-mode . lsp-deferred))
+;; (use-package js2-mode
+;;   :ensure t
+;;   :mode "\\.js\\'"
+;;   :interpreter "node"
+;;   :hook (js2-mode . lsp-deferred))
+
+;; (use-package lv
+;;   :ensure t)
 
 (use-package company
   :ensure t
@@ -11,8 +22,8 @@
   (with-eval-after-load 'company
     (define-key company-active-map (kbd "C-n") 'company-select-next)
     (define-key company-active-map (kbd "C-p") 'company-select-previous)
-    (define-key company-active-map (kbd "C-SPC") 'company-complete-common)
     (define-key company-active-map (kbd "<tab>") 'company-complete))
+
   ;; company-lsp 추가
   (use-package company-lsp
     :ensure t
@@ -25,7 +36,6 @@
     :ensure t
     :hook (company-mode . company-box-mode)
     :config
-    (message "COMPANY BOX MODE")
     (company-box-mode 1)))
 
 (use-package lsp-mode
@@ -33,10 +43,8 @@
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
-  :hook (
-         ;; (ts-ls-mode . lsp)
-         ;; if you want which-key integration
-         (lsp-mode . lsp-enable-which-key-integration))
+  :hook
+  ((lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
 
 (use-package lsp-ui
@@ -66,3 +74,8 @@
 
 (use-package tree-sitter-langs
   :ensure t)
+
+;; Flycheck (코드 검사 및 경고)
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))

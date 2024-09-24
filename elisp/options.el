@@ -19,13 +19,6 @@
 (setq display-time-format "[%Y-%m-%d %H:%M]")
 (display-time-mode 1)
 
-;; UI 간결화 (메뉴바, 툴바, 스크롤바 제거)
-(menu-bar-mode -1)      ;; 메뉴바 비활성화
-(tool-bar-mode -1)      ;; 툴바 비활성화
-(scroll-bar-mode -1)    ;; 스크롤바 비활성화
-(tooltip-mode -1)       ;; 툴팁 비활성화
-(set-fringe-mode 10)    ;; 기본 프린지(가장자리 여백) 설정
-
 ;; 라인 번호 표시
 (global-display-line-numbers-mode t)
 ;; relative 라인 번호
@@ -55,11 +48,6 @@
 ;; start every frame maximized
 ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-;; theme
-(use-package dracula-theme
-  :ensure t
-  :demand t
-  :config (load-theme 'dracula t))
-
 ;; ElDoc Mode disable
+(eldoc-mode -1)
 (global-eldoc-mode -1)
