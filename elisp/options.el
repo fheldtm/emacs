@@ -51,6 +51,14 @@
 ;; start every frame maximized
 ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-;; ElDoc Mode disable
-(eldoc-mode -1)
+;; ElDoc Mode 완전 비활성화
 (global-eldoc-mode -1)
+
+;; 특정 모드에서도 eldoc-mode가 자동으로 켜지지 않도록 하기
+(advice-add 'eldoc-mode :override #'ignore)
+
+
+;; indent space 2
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq indent-line-function 'insert-tab)
