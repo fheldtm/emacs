@@ -53,21 +53,6 @@
 (setq site-run-file nil)
 ;; -UnsetSRF
 
-;; DisableUnnecessaryInterface
-(menu-bar-mode -1)
-(unless (and (display-graphic-p) (eq system-type 'darwin))
-  (push '(menu-bar-lines . 0) default-frame-alist))
-(push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars) default-frame-alist)
-;; -DisableUnnecessaryInterface
-
-;; UI 간결화 (메뉴바, 툴바, 스크롤바 제거)
-;; (menu-bar-mode -1)      ;; 메뉴바 비활성화
-;; (tool-bar-mode -1)      ;; 툴바 비활성화
-;; (scroll-bar-mode -1)    ;; 스크롤바 비활성화
-;; (tooltip-mode -1)       ;; 툴팁 비활성화
-;; (set-fringe-mode 10)    ;; 기본 프린지(가장자리 여백) 설정
-
 (provide 'early-init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; early-init.el ends here
