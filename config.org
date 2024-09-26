@@ -1,0 +1,391 @@
+#+TITLE: Emacs Config
+#+AUTHOR: changju Lee
+#+TOC: true
+#+DATE: <2024-09-26 Thu>
+
+나의 Emacs 구성. vscode를 사용하다가 더 손이 편한 환경을 찾던 중 neovim을 발견하여 사용하였음. 그러나 개발 뿐 아니라 스케쥴 관리, 할일 관리 등을 한 에디터에서 사용하고 싶어 emacs를 사용하기로 결정.
+
+* Setup
+
+** 패키지 관리자로 Elpaca 설정
+
+#+BEGIN_SRC emacs-lisp
+  (defvar elpaca-installer-version 0.7)
+  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+  (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                                :ref nil :depth 1
+                                :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                                :build (:not elpaca--activate-package)))
+  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+         (build (expand-file-name "elpaca/" elpaca-builds-directory))
+         (order (cdr elpaca-order))
+         (default-directory repo))
+    (add-to-list 'load-path (if (file-exists-p build) build repo))
+    (unless (file-exists-p repo)
+      (make-directory repo t)
+      (when (< emacs-major-version 28) (require 'subr-x))
+      (condition-case-unless-debug err
+          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                   ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                   ,@(when-let ((depth (plist-get order :depth)))
+                                                       (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                   ,(plist-get order :repo) ,repo))))
+                   ((zerop (call-process "git" nil buffer t "checkout"
+                                         (or (plist-get order :ref) "--"))))
+                   (emacs (concat invocation-directory invocation-name))
+                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                   ((require 'elpaca))
+                   ((elpaca-generate-autoloads "elpaca" repo)))
+              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+            (error "%s" (with-current-buffer buffer (buffer-string))))
+        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+    (unless (require 'elpaca-autoloads nil t)
+      (require 'elpaca)
+      (elpaca-generate-autoloads "elpaca" repo)
+      (load "./elpaca-autoloads")))
+  (add-hook 'after-init-hook #'elpaca-process-queues)
+  (elpaca `(,@elpaca-order))
+  
+  ;; Uncomment for systems which cannot create symlinks:
+  (elpaca-no-symlink-mode)
+  
+  ;; Install a package via the elpaca macro
+  ;; See the "recipes" section of the manual for more details.
+  
+  ;; (elpaca example-package)
+  
+  ;; Install use-package support
+  (elpaca elpaca-use-package
+    ;; Enable use-package :ensure support for Elpaca.
+    (elpaca-use-package-mode))
+#+END_SRC
+
+** 기본 설정
+
+시간 표시 형식은 영어로 표시해서 호환성을 높입니다.
+
+#+BEGIN_SRC emacs-lisp
+(setq system-time-locale "C")
+#+END_SRC
+
+모드 라인에 2018-06-03 16:06 형식으로 시간을 표시합니다.
+
+#+BEGIN_SRC emacs-lisp
+(setq display-time-format "[%Y-%m-%d %H:%M]")
+(display-time-mode 1)
+#+END_SRC
+
+라인 번호 표시
+
+#+BEGIN_SRC emacs-lisp
+(global-display-line-numbers-mode t)
+#+END_SRC
+
+relative 라인 번호
+
+#+BEGIN_SRC emacs-lisp
+(setq display-line-numbers-type 'relative)
+#+END_SRC
+
+기본 폰트 설정
+
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'default nil :font "Fira Code" :height 100 :weight 'regular)
+(if (eq system-type 'darwin)
+  (set-face-attribute 'default nil :font "Fira Code" :height 140 :weight 'regular)
+)
+#+END_SRC
+
+특정 모드에서는 라인 번호를 비활성화
+
+#+BEGIN_SRC emacs-lisp
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+END_SRC
+
+백업 및 자동 저장 파일 비활성화
+
+#+BEGIN_SRC emacs-lisp
+(setq make-backup-files nil)    ;; 백업 파일 생성 방지
+(setq auto-save-default nil)    ;; 자동 저장 방지
+(setq create-lockfiles nil)     ;; Lock 파일 생성 방지
+#+END_SRC
+
+desktop 화면 크기 및 위치를 종료시 위치로 기억하기
+
+#+BEGIN_SRC emacs-lisp
+(desktop-save-mode 1)
+#+END_SRC
+
+ElDoc Mode 완전 비활성화
+
+#+BEGIN_SRC emacs-lisp
+(global-eldoc-mode -1)
+#+END_SRC
+
+특정 모드에서도 eldoc-mode가 자동으로 켜지지 않도록 하기
+
+#+BEGIN_SRC emacs-lisp
+(advice-add 'eldoc-mode :override #'ignore)
+#+END_SRC
+
+** 패키지 설정
+
+*** Theme
+
+#+BEGIN_SRC emacs-lisp
+(use-package atom-one-dark-theme
+  :ensure t
+  :demand t)
+
+(use-package catppuccin-theme
+  :ensure t
+  :demand t
+  ;; :init (setq catppuccin-flavor 'frappe)
+  :init (setq catppuccin-flavor 'mocha)
+  :config (load-theme 'catppuccin t))
+
+(use-package zenburn-theme
+  :ensure t)
+#+END_SRC
+
+*** Evil
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil
+  :ensure t
+  :demand t
+  :init
+  (setq evil-undo-system 'undo-redo)
+  (setq evil-want-C-u-scroll t)
+  :config
+  (evil-mode 1)
+  (evil-define-key 'insert 'evil-insert-state-map (kbd "C-c") 'evil-force-normal-state)
+  (define-key evil-normal-state-map (kbd "s") nil))
+#+END_SRC
+
+*** ivy
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :ensure t
+  :demand
+  :bind
+  (("C-s" . swiper)
+   ("M-x" . counsel-M-x))
+  :config
+  (ivy-mode 1))
+#+END_SRC
+
+*** counsel
+
+#+BEGIN_SRC emacs-lisp
+(use-package counsel
+  :after ivy
+  :ensure t)
+#+END_SRC
+
+*** swiper
+
+#+BEGIN_SRC emacs-lisp
+(use-package swiper
+  :after ivy
+  :ensure t)
+#+END_SRC
+
+*** dashboard
+
+#+BEGIN_SRC emacs-lisp
+(use-package dashboard
+  :ensure t
+  :config
+  (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
+  (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
+  (dashboard-setup-startup-hook))
+#+END_SRC
+
+*** winum
+
+#+BEGIN_SRC emacs-lisp
+(use-package winum
+  :ensure t
+  :init
+  (setq winum-keymap
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "C-`") 'winum-select-window-by-number)
+      (define-key map (kbd "C-1") 'winum-select-window-1)
+      (define-key map (kbd "C-2") 'winum-select-window-2)
+      (define-key map (kbd "C-3") 'winum-select-window-3)
+      (define-key map (kbd "C-4") 'winum-select-window-4)
+      (define-key map (kbd "C-5") 'winum-select-window-5)
+      (define-key map (kbd "C-6") 'winum-select-window-6)
+      (define-key map (kbd "C-7") 'winum-select-window-7)
+      (define-key map (kbd "C-8") 'winum-select-window-8)
+      (define-key map (kbd "C-9") 'winum-select-window-9)
+      map))
+  :config
+  (winum-mode 1))
+#+END_SRC
+
+*** transient
+
+#+BEGIN_SRC emacs-lisp
+(use-package transient
+  :ensure t)
+#+END_SRC
+
+*** magit
+
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :after transient
+  :init
+  (setq magit-auto-revert-mode nil)
+  :ensure t)
+#+END_SRC
+
+*** projectile
+
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode 1))
+#+END_SRC
+
+*** treemasc
+
+#+BEGIN_SRC emacs-lisp
+(use-package treemacs
+  :ensure t
+  :defer t)
+
+(use-package treemacs-evil
+  :after (treemacs evil)
+  :ensure t)
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
+
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
+
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
+
+(use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+  :after (treemacs)
+  :ensure t
+  :config (treemacs-set-scope-type 'Tabs))
+#+END_SRC
+
+*** company
+
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :ensure t
+  :init
+  (setq company-idle-delay 0.0)  ;; 자동 완성 대기 시간
+  (setq company-minimum-prefix-length 1)  ;; 최소 입력 길이
+  :config
+  (global-company-mode 1)
+  (with-eval-after-load 'company
+    (define-key company-active-map (kbd "C-n") 'company-select-next)
+    (define-key company-active-map (kbd "C-p") 'company-select-previous)
+    (define-key company-active-map (kbd "<tab>") 'company-complete))
+
+  ;; company-lsp 추가
+  (use-package company-lsp
+    :ensure t
+    :config
+    (setq company-backends (delete 'company-semantic company-backends)) ;; semantic 백엔드 제거
+    (add-to-list 'company-backends 'company-lsp)) ;; lsp 백엔드 추가
+
+  ;; company-box 추가
+  (use-package company-box
+    :ensure t
+    :hook (company-mode . company-box-mode)
+    :config
+    (company-box-mode 1)))
+#+END_SRC
+
+*** lsp
+
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :hook (
+         ;; which key
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; optionally
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+;; if you are ivy user
+(use-package lsp-ivy
+  :ensure t
+  :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs
+  :ensure t
+  :commands lsp-treemacs-errors-list)
+
+;; optionally if you want to use debugger
+(use-package dap-mode
+  :ensure t)
+#+END_SRC
+
+*** which-key
+
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+#+END_SRC
+
+*** flycheck
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+#+END_SRC
+
+** KEYMAP
+
+#+BEGIN_SRC emacs-lisp
+(use-package general
+  :after evil
+  :ensure t
+  :config
+  (general-define-key
+    :states 'normal
+    "s h" 'windmove-left
+    "s j" 'windmove-down
+    "s k" 'windmove-up
+    "s l" 'windmove-right
+    "s v" 'split-window-horizontally
+    "s s" 'split-window-vertically
+    "; v" 'treemacs-select-window
+    "; g" 'counsel-rg
+    "; r" 'counsel-recentf
+    "; b" 'counsel-ibuffer
+    "; f" 'projectile-find-file))
+#+END_SRC

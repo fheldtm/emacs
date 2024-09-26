@@ -25,9 +25,9 @@
 (setq display-line-numbers-type 'relative)
 
 ;; 기본 폰트 설정
-(set-face-attribute 'default nil :font "Fira Code" :height 100)
+(set-face-attribute 'default nil :font "Fira Code" :height 100 :weight 'regular)
 (if (eq system-type 'darwin)
-  (set-face-attribute 'default nil :font "Fira Code" :height 140)
+  (set-face-attribute 'default nil :font "Fira Code" :height 140 :weight 'regular)
 )
 
 ;; 특정 모드에서는 라인 번호를 비활성화
@@ -56,7 +56,6 @@
 
 ;; 특정 모드에서도 eldoc-mode가 자동으로 켜지지 않도록 하기
 (advice-add 'eldoc-mode :override #'ignore)
-
 
 ;; indent space 2
 (setq-default indent-tabs-mode nil)

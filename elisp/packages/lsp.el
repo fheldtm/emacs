@@ -1,3 +1,4 @@
+;; company
 (use-package company
   :ensure t
   :init
@@ -24,12 +25,35 @@
     :config
     (company-box-mode 1)))
 
-(use-package js-ts-mode
+(use-package lsp-mode
   :ensure t
-  :hook (js-ts-mode . eglot-ensure)
+  :hook (
+         ;; which key
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; optionally
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+;; if you are ivy user
+(use-package lsp-ivy
+  :ensure t
+  :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs
+  :ensure t
+  :commands lsp-treemacs-errors-list)
+
+;; optionally if you want to use debugger
+(use-package dap-mode
+  :ensure t)
+
+;; optional if you want which-key integration
+(use-package which-key
+  :ensure t
   :config
-  (add-to-list 'auto-mode-alist '("\\.js\\" . js-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.ts\\" . js-ts-mode)))
+  (which-key-mode))
 
 ;; Flycheck (코드 검사 및 경고)
 (use-package flycheck
