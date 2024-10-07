@@ -123,6 +123,14 @@ desktop 화면 크기 및 위치를 종료시 위치로 기억하기
 (desktop-save-mode 1)
 #+END_SRC
 
+Indent 설정
+
+#+BEGIN_SRC emacs-lisp
+(setq-default tab-width 2) ;; 탭의 크기를 4로 설정
+(setq-default indent-tabs-mode nil) ;; 탭 대신 공백 사용
+(setq js-indent-level 2)
+#+END_SRC
+
 ElDoc Mode 완전 비활성화
 
 #+BEGIN_SRC emacs-lisp
@@ -166,7 +174,6 @@ ElDoc Mode 완전 비활성화
   (setq evil-want-C-u-scroll t)
   :config
   (evil-mode 1)
-  (evil-define-key 'insert 'evil-insert-state-map (kbd "C-c") 'evil-force-normal-state)
   (define-key evil-normal-state-map (kbd "s") nil))
 #+END_SRC
 
@@ -326,11 +333,18 @@ ElDoc Mode 완전 비활성화
 *** lsp
 
 #+BEGIN_SRC emacs-lisp
+(use-package js-ts-mode
+  :mode (("\\.js\\'" . js-ts-mode)
+         ("\\.jsx\\'" . js-ts-mode)
+         ("\\.ts\\'" . js-ts-mode)
+         ("\\.tsx\\'" . js-ts-mode)))
+
 (use-package lsp-mode
   :ensure t
   :hook (
-         ;; which key
-         (lsp-mode . lsp-enable-which-key-integration))
+  ;; which key
+  (lsp-mode . lsp-enable-which-key-integration)
+  (js-ts-mode . lsp-deferred))
   :commands lsp)
 
 ;; optionally
@@ -366,6 +380,14 @@ ElDoc Mode 완전 비활성화
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode))
+#+END_SRC
+
+*** Snippet
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :init (yas-global-mode 1))
 #+END_SRC
 
 ** KEYMAP

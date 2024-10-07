@@ -12,3 +12,4 @@ projectile.cache
 org-persist/
 config.el
 .lsp-session-*
+.dap-breakpoints
