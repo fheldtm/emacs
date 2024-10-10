@@ -10,57 +10,57 @@
 ** 패키지 관리자로 Elpaca 설정
 
 #+BEGIN_SRC emacs-lisp
-  (defvar elpaca-installer-version 0.7)
-  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-  (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                                :ref nil :depth 1
-                                :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                                :build (:not elpaca--activate-package)))
-  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-         (build (expand-file-name "elpaca/" elpaca-builds-directory))
-         (order (cdr elpaca-order))
-         (default-directory repo))
-    (add-to-list 'load-path (if (file-exists-p build) build repo))
-    (unless (file-exists-p repo)
-      (make-directory repo t)
-      (when (< emacs-major-version 28) (require 'subr-x))
-      (condition-case-unless-debug err
-          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                   ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                   ,@(when-let ((depth (plist-get order :depth)))
-                                                       (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                   ,(plist-get order :repo) ,repo))))
-                   ((zerop (call-process "git" nil buffer t "checkout"
-                                         (or (plist-get order :ref) "--"))))
-                   (emacs (concat invocation-directory invocation-name))
-                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                   ((require 'elpaca))
-                   ((elpaca-generate-autoloads "elpaca" repo)))
-              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-            (error "%s" (with-current-buffer buffer (buffer-string))))
-        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-    (unless (require 'elpaca-autoloads nil t)
-      (require 'elpaca)
-      (elpaca-generate-autoloads "elpaca" repo)
-      (load "./elpaca-autoloads")))
-  (add-hook 'after-init-hook #'elpaca-process-queues)
-  (elpaca `(,@elpaca-order))
-  
-  ;; Uncomment for systems which cannot create symlinks:
-  (elpaca-no-symlink-mode)
-  
-  ;; Install a package via the elpaca macro
-  ;; See the "recipes" section of the manual for more details.
-  
-  ;; (elpaca example-package)
-  
-  ;; Install use-package support
-  (elpaca elpaca-use-package
-    ;; Enable use-package :ensure support for Elpaca.
-    (elpaca-use-package-mode))
+(defvar elpaca-installer-version 0.7)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+        (build (expand-file-name "elpaca/" elpaca-builds-directory))
+        (order (cdr elpaca-order))
+        (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+
+;; Uncomment for systems which cannot create symlinks:
+(elpaca-no-symlink-mode)
+
+;; Install a package via the elpaca macro
+;; See the "recipes" section of the manual for more details.
+
+;; (elpaca example-package)
+
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable use-package :ensure support for Elpaca.
+  (elpaca-use-package-mode))
 #+END_SRC
 
 ** 기본 설정
@@ -94,12 +94,14 @@ relative 라인 번호
 
 #+BEGIN_SRC emacs-lisp
 (set-face-attribute 'default nil
-                    :font "Fira Code"
+                    ;; :font "Fira Code"
+                    :font "Hack Nerd Font"
                     :height 100
                     :weight 'regular)
 (if (eq system-type 'darwin)
   (set-face-attribute 'default nil
-                      :font "Fira Code"
+                      ;; :font "Fira Code"
+                      :font "Hack Nerd Font"
                       :height 140
                       :weight 'regular)
 )
@@ -126,7 +128,20 @@ relative 라인 번호
 desktop 화면 크기 및 위치를 종료시 위치로 기억하기
 
 #+BEGIN_SRC emacs-lisp
-(desktop-save-mode 1)
+(use-package desktop
+  :config
+  (desktop-save-mode 1)
+  ;; 각 버퍼에 해당하는 major-mode 설정
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (dolist (buf (buffer-list))
+                (with-current-buffer buf
+                  ;; 현재 버퍼에 major-mode가 지정되어 있으면 그 모드를 재적용
+                  (when major-mode
+                    ;; 각 버퍼의 이름과 major-mode를 출력
+                    (message "Buffer: %s, Major mode: %s" (buffer-name) major-mode)
+                    ;; major-mode를 다시 적용
+                    (funcall major-mode)))))))
 #+END_SRC
 
 Indent 설정
@@ -135,6 +150,7 @@ Indent 설정
 (setq-default tab-width 2) ;; 탭의 크기를 4로 설정
 (setq-default indent-tabs-mode nil) ;; 탭 대신 공백 사용
 (setq js-indent-level 2)
+(setq web-indent-level 2)
 #+END_SRC
 
 ElDoc Mode 완전 비활성화
@@ -167,15 +183,6 @@ ElDoc Mode 완전 비활성화
 
 (use-package zenburn-theme
   :ensure t)
-#+END_SRC
-
-*** Org Mode
-
-#+BEGIN_SRC emacs-lisp
-(use-package org-modern
-  :ensure t
-  :config
-  (global-org-modern-mode))
 #+END_SRC
 
 *** Evil
@@ -330,13 +337,6 @@ ElDoc Mode 완전 비활성화
     (define-key company-active-map (kbd "C-p") 'company-select-previous)
     (define-key company-active-map (kbd "<tab>") 'company-complete))
 
-  ;; company-lsp 추가
-  (use-package company-lsp
-    :ensure t
-    :config
-    (setq company-backends (delete 'company-semantic company-backends)) ;; semantic 백엔드 제거
-    (add-to-list 'company-backends 'company-lsp)) ;; lsp 백엔드 추가
-
   ;; company-box 추가
   (use-package company-box
     :ensure t
@@ -345,39 +345,59 @@ ElDoc Mode 완전 비활성화
     (company-box-mode 1)))
 #+END_SRC
 
-*** lsp
+;; *** lsp
+
+;; #+BEGIN_SRC emacs-lisp
+;; ;; javascript, typescript
+;; (use-package js-ts-mode
+;;   :hook (js-ts-mode . lsp-deferred)
+;;   :mode (("\\.js\\'" . js-ts-mode)
+;;          ("\\.jsx\\'" . js-ts-mode)
+;;          ("\\.ts\\'" . js-ts-mode)
+;;          ("\\.tsx\\'" . js-ts-mode)))
+;; 
+;; ;; web-mode
+;; (use-package web-mode
+;;   :ensure t
+;;   :mode (("\\.vue\\'" . web-mode))
+;;   :hook (web-mode . lsp-deferred))
+;; 
+;; (use-package lsp-mode
+;;   :ensure t
+;;   :hook (
+;;     (lsp-mode . lsp-enable-which-key-integration)
+;;     (js-ts-mode . lsp-deferred))
+;;   :commands lsp)
+;; 
+;; ;; optionally
+;; (use-package lsp-ui
+;;   :ensure t
+;;   :commands lsp-ui-mode)
+;; 
+;; ;; if you are ivy user
+;; (use-package lsp-ivy
+;;   :ensure t
+;;   :commands lsp-ivy-workspace-symbol)
+;; (use-package lsp-treemacs
+;;   :ensure t
+;;   :commands lsp-treemacs-errors-list)
+;; 
+;; ;; optionally if you want to use debugger
+;; (use-package dap-mode
+;;   :ensure t)
+;; #+END_SRC
+
+*** eglot
 
 #+BEGIN_SRC emacs-lisp
-(use-package js-ts-mode
-  :mode (("\\.js\\'" . js-ts-mode)
-         ("\\.jsx\\'" . js-ts-mode)
-         ("\\.ts\\'" . js-ts-mode)
-         ("\\.tsx\\'" . js-ts-mode)))
-
-(use-package lsp-mode
-  :ensure t
-  :hook (
-  ;; which key
-  (lsp-mode . lsp-enable-which-key-integration)
-  (js-ts-mode . lsp-deferred))
-  :commands lsp)
-
-;; optionally
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
-
-;; if you are ivy user
-(use-package lsp-ivy
-  :ensure t
-  :commands lsp-ivy-workspace-symbol)
-(use-package lsp-treemacs
-  :ensure t
-  :commands lsp-treemacs-errors-list)
-
-;; optionally if you want to use debugger
-(use-package dap-mode
+;; web-mode
+(use-package web-mode
   :ensure t)
+
+(use-package eglot
+  :config
+  (add-to-list 'eglot-server-programs
+               '((js-ts-mode) "typescript-language-server" "--stdio")))
 #+END_SRC
 
 *** which-key
@@ -403,6 +423,28 @@ ElDoc Mode 완전 비활성화
 (use-package yasnippet
   :ensure t
   :init (yas-global-mode 1))
+#+END_SRC
+
+*** Org Mode
+
+#+BEGIN_SRC emacs-lisp
+;; org-superstar 설정: org-mode에서만 사용
+(use-package org-superstar
+  :ensure t
+  :hook (org-mode . org-superstar-mode))  ;; org-mode에서 org-superstar 사용
+
+;; evil-org 설정: org-mode에서만 사용
+(use-package evil-org
+  :ensure t
+  :hook (org-mode . evil-org-mode)  ;; org-mode에서 evil-org 사용
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+;; org-appear 설정: org-mode에서만 사용
+(use-package org-appear
+  :ensure t
+  :hook (org-mode . org-appear-mode))  ;; org-mode에서 org-appear 사용
 #+END_SRC
 
 ** KEYMAP
